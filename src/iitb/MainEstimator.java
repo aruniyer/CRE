@@ -14,10 +14,10 @@ public class MainEstimator {
 
     public static void main(String[] args) throws Exception {
         System.out.print("Loading training data ... ");
-        IDataStore trainStore = Utility.readCSVFile("../shuttle_train.csv", ",", true);
+        IDataStore trainStore = Utility.readCSVFile("data/shuttle_train.csv", ",", true);
         System.out.println("[DONE]");
         System.out.print("Loading test data ... ");
-        IDataStore testStore = Utility.readCSVFile("../shuttle_test.csv", ",", true);
+        IDataStore testStore = Utility.readCSVFile("data/shuttle_test.csv", ",", true);
         System.out.println("[DONE]");
         System.out.print("Computing kernel matrices ... ");
         

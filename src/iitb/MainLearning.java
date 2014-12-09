@@ -16,14 +16,14 @@ import iitb.kernel.WeightedKernelFunction;
 public class MainLearning {
     
     public static void main(String[] args) throws Exception {
-        String prefix = "/home/aruniyer/Workspace/Data/forpedrtest/";
-        String trainingFile = prefix + "Australian_train_0.1_1_400";
-        String outputFile = "";
-        String testingFile = prefix + "Australian_test_0.1_1_400";
-        String trainSeparator = " ";
-        String testSeparator = " ";
-        boolean headerTrain = false;
-        boolean headerTest = false;
+        String prefix = "data/";
+        String trainingFile = prefix + "shuttle_train.csv";
+        String outputFile = "data/";
+        String testingFile = prefix + "shuttle_test.csv";
+        String trainSeparator = ",";
+        String testSeparator = ",";
+        boolean headerTrain = true;
+        boolean headerTest = true;
         
         System.out.print("Loading training data ... ");
         IDataStore D = Utility.readCSVFile(trainingFile, trainSeparator, headerTrain);
