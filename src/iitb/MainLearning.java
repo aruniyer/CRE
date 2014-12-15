@@ -18,7 +18,7 @@ public class MainLearning {
     public static void main(String[] args) throws Exception {
         String prefix = "data/";
         String trainingFile = prefix + "shuttle_train.csv";
-        String outputFile = "data/";
+        String outputFile = "output";
         String testingFile = prefix + "shuttle_test.csv";
         String trainSeparator = ",";
         String testSeparator = ",";
