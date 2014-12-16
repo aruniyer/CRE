@@ -39,7 +39,12 @@ public class SimpleInstance implements IInstance {
     
     @Override
     public IInstance clone() {
-        return (IInstance) this.clone();
+        try {
+            return (IInstance) super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 }

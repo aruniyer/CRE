@@ -79,10 +79,11 @@ public class FeatureStoreWrapper implements IDataStore {
         @Override
         public IInstance clone() {
             try {
-        	return new InstanceWrapper((Instance) instance.clone());
-            } catch (CloneNotSupportedException cloneNotSupportedException) {
-        	throw new RuntimeException("cloning not supported!", cloneNotSupportedException);
+                return (IInstance) super.clone();
+            } catch (CloneNotSupportedException e) {
+                e.printStackTrace();
             }
+            return null;
         }
 
     }

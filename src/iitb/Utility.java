@@ -19,6 +19,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import weka.core.Instances;
 import weka.core.converters.CSVLoader;
+import weka.core.converters.LibSVMLoader;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.NumericToNominal;
 
@@ -74,7 +75,7 @@ public class Utility {
             String weight = cols[2];
             IKernelFunction kernelFunction = (IKernelFunction) Class.forName(clazzName).newInstance();
             Properties properties = new Properties();
-            for (String parameter : parameters.split(",")) {
+            for (String parameter : parameters.split(";")) {
                 String[] keyVal = parameter.split("=");
                 properties.setProperty(keyVal[0], keyVal[1]);
             }
@@ -257,6 +258,36 @@ public class Utility {
         }
         dataset.setClassIndex(dataset.numAttributes() - 1);
         return new WekaStoreWrapper(dataset);
+    }
+    
+    public static IDataStore readLSVMFile(String file) throws Exception {
+        return readLSVMFile(file, false);
+    }
+
+    public static IDataStore readLSVMFile(String file, boolean isLabelNumeric) throws Exception {
+        LibSVMLoader loader = new LibSVMLoader();
+        loader.setFile(new File(file));
+        Instances dataset = loader.getDataSet();
+        return new WekaStoreWrapper(dataset);
+    }
+    
+    public static TIntArrayList selectKRandom(Random rand, int n, int k) {
+        int array[] = new int[n];
+        for (int i = 0; i < array.length; i++) {
+            array[i] = i;
+        }
+        int p = Math.min(k, array.length);
+        TIntArrayList selElems = new TIntArrayList();
+        for (int i = 0; i < p; i++) {
+            int rem = array.length-i;
+            int swapPos = i + rand.nextInt(rem);
+            int oldVal = array[swapPos];
+            array[swapPos] = array[i];
+            array[i] = oldVal;
+            selElems.add(array[i]);
+        }
+        selElems.sort();
+        return selElems;
     }
 
 }

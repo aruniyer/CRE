@@ -7,6 +7,8 @@ import iitb.data.IInstance;
 public class GaussianFunction implements IKernelFunction {
 
     public static String SIGMA = "sigma";
+    public static String RANGED = "ranged";
+    public static String ATTRIBUTES = "attributes";
     
     private double sigma;
     private double gamma;
@@ -20,6 +22,10 @@ public class GaussianFunction implements IKernelFunction {
     public GaussianFunction(double sigma) {
         this(sigma, false, null);
     }
+    
+    public GaussianFunction(double sigma, int attribute) {
+        this(sigma, true, new int[]{attribute});
+    }
 
     public GaussianFunction(double sigma, boolean ranged, int[] attributes) {
         this.sigma = sigma;
@@ -32,6 +38,14 @@ public class GaussianFunction implements IKernelFunction {
     
     public double getSigma() {
         return this.sigma;
+    }
+    
+    public boolean isRanged() {
+        return this.ranged;
+    }
+    
+    public int[] getAttributes() {
+        return this.attributes;
     }
 
     public double get(IInstance instance1, IInstance instance2) {
@@ -54,9 +68,23 @@ public class GaussianFunction implements IKernelFunction {
 
     @Override
     public void setParameters(Properties properties) {
-        String value = properties.getProperty(SIGMA);
-        if (value != null) {
-            this.sigma = Double.valueOf(value);
+        String sigma = properties.getProperty(SIGMA);
+        if (sigma != null) {
+            this.sigma = Double.valueOf(sigma);
+        }
+        
+        String ranged = properties.getProperty(RANGED);
+        if (ranged != null) {
+            this.ranged = Boolean.valueOf(ranged);
+        }
+        
+        if (this.ranged) {
+            String attributes = properties.getProperty(ATTRIBUTES);
+            String[] atts = attributes.split(",");
+            this.attributes = new int[atts.length];
+            for (int i = 0; i < atts.length; i++) {
+                this.attributes[i] = Integer.parseInt(atts[i]);
+            }
         }
     }
 

@@ -18,8 +18,8 @@ public class MainLearning {
     public static void main(String[] args) throws Exception {
         String prefix = "data/";
         String trainingFile = prefix + "shuttle_train.csv";
-        String outputFile = "output";
-        String testingFile = prefix + "shuttle_test.csv";
+        String outputFile = "shuttle.klist";
+        String testingFile = "";
         String trainSeparator = ",";
         String testSeparator = ",";
         boolean headerTrain = true;
@@ -34,9 +34,12 @@ public class MainLearning {
         System.out.println("Running kernel learning procedure ... ");
         int numFeatures = D.numFeatures();
         double[] log2bs = {-6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6};
-        GaussianFunction[] baseKernelFunctions = new GaussianFunction[log2bs.length];
+        GaussianFunction[] baseKernelFunctions = new GaussianFunction[numFeatures + log2bs.length];
+        for (int i = 0; i < numFeatures; i++) {
+            baseKernelFunctions[i] = new GaussianFunction(bandwidth, i);
+        }
         for (int i = 0; i < log2bs.length; i++) {
-            baseKernelFunctions[i] = new GaussianFunction(Math.pow(2, log2bs[i]) * bandwidth * numFeatures * numFeatures);
+            baseKernelFunctions[numFeatures + i] = new GaussianFunction(Math.pow(2, log2bs[i]) * bandwidth * numFeatures * numFeatures);
         }
         int numProportions = 11;
         int numPrototypesPerProportion = 2;
@@ -53,7 +56,12 @@ public class MainLearning {
                     continue;
                 System.out.println("C1 = " + C1 + ", C2 = " + C2);
                 KernelLearningGD kernelLearning = new KernelLearningGD(D, Us, baseKernelFunctions, C1, C2);
-                kernelLearning.learnWeights();
+                try {
+                    kernelLearning.learnWeights();
+                } catch (RuntimeException runtimeException) {
+                    // if certain parameter settings lead to no solution, skip those parameter settings
+                    continue;
+                }
                 System.out.println("kernel learning procedure completed.");
                 
                 System.out.print("Base Kernel Sigmas : ");
@@ -93,6 +101,14 @@ public class MainLearning {
             for (int i = 0; i < baseKernelFunctions.length; i++) {
                 bufferedWriter.write(baseKernelFunctions[i].getClass().getName());
                 bufferedWriter.write("#" + GaussianFunction.SIGMA + "=" + baseKernelFunctions[i].getSigma());
+                if (baseKernelFunctions[i].isRanged()) {
+                    bufferedWriter.write(";" + GaussianFunction.RANGED + "=true");
+                    int[] atts = baseKernelFunctions[i].getAttributes(); 
+                    bufferedWriter.write(";" + GaussianFunction.ATTRIBUTES + "=" + atts[0]);
+                    for (int j = 1; j < atts.length; j++) {
+                        bufferedWriter.write("," + atts[j]);
+                    }
+                }
                 bufferedWriter.write("#" + minWeights[i]);
                 bufferedWriter.newLine();
             }

@@ -73,7 +73,12 @@ public class WekaStoreWrapper implements IDataStore {
         
         @Override
         public IInstance clone() {
-            return this.clone();
+            try {
+                return (IInstance) super.clone();
+            } catch (CloneNotSupportedException e) {
+                e.printStackTrace();
+            }
+            return null;
         }
 
     }
