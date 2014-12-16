@@ -125,7 +125,7 @@ public class Utility {
 
     public static float[][] getSimplexSamples(int corners, int numSamples, GammaDistribution[] gammaDistributions) {
         if (corners == 2 && numSamples == 11 && allEqualShapes(gammaDistributions)) {
-            return new float[][] { { 0.01f, 0.99f }, { 0.1f, 0.9f }, { 0.2f, 0.8f }, { 0.3f, 0.7f }, { 0.4f, 0.6f }, { 0.5f, 0.5f }, { 0.6f, 0.4f }, { 0.7f, 0.3f }, { 0.8f, 0.2f }, { 0.1f, 0.9f }, { 0.99f, 0.01f } };
+            return new float[][] { { 0.01f, 0.99f }, { 0.1f, 0.9f }, { 0.2f, 0.8f }, { 0.3f, 0.7f }, { 0.4f, 0.6f }, { 0.5f, 0.5f }, { 0.6f, 0.4f }, { 0.7f, 0.3f }, { 0.8f, 0.2f }, { 0.9f, 0.1f }, { 0.99f, 0.01f } };
         } else {
             float[][] simplexSamples = new float[numSamples][corners];
             for (int i = 0; i < numSamples; i++) {
@@ -175,6 +175,16 @@ public class Utility {
             }
             currentIndex[y]++;
             index++;
+        }
+        
+        // Do resample if insufficient examples for a class
+        for (int y = 0; y < dataStore.numClasses(); y++) {
+            int len = classToInstanceList.get(y).size();
+            while (currentIndex[y] < counts[y]) {
+                int ind = classToInstanceList.get(y).get(random.nextInt(len));
+                classToInstanceList.get(y).add(ind);
+                currentIndex[y]++;
+            }
         }
 
         TIntArrayList indexList = new TIntArrayList();
