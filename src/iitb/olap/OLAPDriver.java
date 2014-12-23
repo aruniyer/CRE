@@ -8,9 +8,11 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Random;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
+import iitb.Utility;
 import iitb.cre.MMDEstimator;
 import iitb.data.IInstance;
 import iitb.kernel.GaussianFunction;
@@ -22,9 +24,21 @@ import iitb.olap.MMDConsistency.WeightScheme;
 public class OLAPDriver {
 
     public static void main(String[] args) throws Exception {
+        String dataset = "SatImage";
+        String outputPrefix = dataset + "2_cons_output_";
+        int numFeatures = 36;
+        Random random = new Random(1);
+        for (int i = 0; i < 10; i++) {
+            TIntArrayList perm = Utility.selectKRandom(random, numFeatures, 3);
+//            TIntArrayList perm = new TIntArrayList();
+//            perm.add(4); perm.add(6); perm.add(7);
+            main2(dataset, perm.toArray(), outputPrefix + Arrays.toString(perm.toArray()) + ".csv");
+        }
+    }
+    
+    public static void main2(String dataset, int[] atts, String outputFile) throws Exception {
         // String configFile = args[0];
         String configFile = "configcons.xml";
-        String outputFile = "consistency_output";
 
         StringBuilder builder = new StringBuilder();
         builder.append("-Inf");
@@ -33,16 +47,12 @@ public class OLAPDriver {
         }
         builder.append(", Inf");
 
-        Config config = new Config(configFile, "Shuttle", "Gaussian", "4:[" + builder.toString() + "]; 6:[" + builder.toString() + "]; 7:[" + builder.toString() + "]");
-
-//        StringBuilder builder = new StringBuilder();
-//        builder.append("-Inf");
-//        for (double x = -0.9; x < 1; x += 0.1) {
-//            builder.append(", " + x);
-//        }
-//        builder.append(", Inf");
-//
-//        Config config = new Config(configFile, "SatImage", "Gaussian", "1:[" + builder.toString() + "]; 2:[" + builder.toString() + "]; 3:[" + builder.toString() + "]");
+        String attributeStr = atts[0] + ":[" + builder.toString() + "]";
+        for (int i = 1; i < atts.length; i++) {
+            attributeStr += "; " + atts[i] + ":[" + builder.toString() + "]";
+        }
+        
+        Config config = new Config(configFile, dataset, "Gaussian", attributeStr);
 
         System.out.println("Loading data handler ... ");
         DataHandler dataHandler = config.getDataHandler();
@@ -67,17 +77,17 @@ public class OLAPDriver {
         bufferedWriter.newLine();
         bufferedWriter.flush();
 
-        doCheckConsistency(A, b, dataHandler);
-//         doMMDCR(A, b, dataHandler, bufferedWriter);
-        // doMMDCRStraw(A, b, dataHandler, bufferedWriter);
-        // doMMDConsistency(A, b, dataHandler, WeightScheme.ALLEQUAL, bufferedWriter);
-        // doMMDConsistency(A, b, dataHandler, WeightScheme.ROOTSCHEME, bufferedWriter);
-        // doMMDConsistency(A, b, dataHandler, WeightScheme.PROPWEIGHTSCHEME, bufferedWriter);
-        // doMMDConsistency(A, b, dataHandler, WeightScheme.INVPROPWEIGHTSCHEME, bufferedWriter);
-        // doMMDConsistency(A, b, dataHandler, WeightScheme.PROPCHILDSCHEME, bufferedWriter);
-        // doMMDConsistency(A, b, dataHandler, WeightScheme.PROPCHILDWEIGHTSCHEME, bufferedWriter);
-        // doMMDConsistency(A, b, dataHandler, WeightScheme.PROPCHILDINVWEIGHTSCHEME, bufferedWriter);
-//        doMMDConsistency(A, b, dataHandler, WeightScheme.DISPARITYSCHEME, bufferedWriter);
+//        doCheckConsistency(A, b, dataHandler);
+        doMMDCR(A, b, dataHandler, bufferedWriter);
+        doMMDCRStraw(A, b, dataHandler, bufferedWriter);
+        doMMDConsistency(A, b, dataHandler, WeightScheme.ALLEQUAL, bufferedWriter);
+//        doMMDConsistency(A, b, dataHandler, WeightScheme.ROOTSCHEME, bufferedWriter);
+//        doMMDConsistency(A, b, dataHandler, WeightScheme.PROPWEIGHTSCHEME, bufferedWriter);
+//        doMMDConsistency(A, b, dataHandler, WeightScheme.INVPROPWEIGHTSCHEME, bufferedWriter);
+//        doMMDConsistency(A, b, dataHandler, WeightScheme.PROPCHILDSCHEME, bufferedWriter);
+//        doMMDConsistency(A, b, dataHandler, WeightScheme.PROPCHILDWEIGHTSCHEME, bufferedWriter);
+//        doMMDConsistency(A, b, dataHandler, WeightScheme.PROPCHILDINVWEIGHTSCHEME, bufferedWriter);
+        doMMDConsistency(A, b, dataHandler, WeightScheme.DISPARITYSCHEME, bufferedWriter);
         bufferedWriter.close();
     }
 

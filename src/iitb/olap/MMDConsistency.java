@@ -34,9 +34,9 @@ public class MMDConsistency {
         this.dataHandler = dataHandler;
 
         this.scheme = scheme;
-        if (this.scheme.equals(WeightScheme.DISPARITYSCHEME)) {
-            doWeightLearning();
-        }
+//        if (this.scheme.equals(WeightScheme.DISPARITYSCHEME)) {
+//            doWeightLearning();
+//        }
         double[] x = new double[b.length * A.length];
         Arrays.fill(x, 1.0 / A.length);
         this.objective = doBlockCoordinateGradientDescent(x);
@@ -374,16 +374,16 @@ public class MMDConsistency {
             return count * total / sum;
         }
         case DISPARITYSCHEME: {
-//            double total = 0;
-//            double sum = 0;
-//            for (int i = 0; i < baseIndicator.length; i++) {
-//                if (baseIndicator[i] == 1) {
-//                    total = total + nu[i];
-//                    sum += nu[i] * nu[i];
-//                }
-//            }
-//            return sum / (total * total);
-            return weights[groupIndex.get(new TIntArrayList(baseIndicator))];
+            double total = 0;
+            double sum = 0;
+            for (int i = 0; i < baseIndicator.length; i++) {
+                if (baseIndicator[i] == 1) {
+                    total = total + nu[i];
+                    sum += nu[i] * nu[i];
+                }
+            }
+            return Math.sqrt((total * total) / sum);
+//            return weights[groupIndex.get(new TIntArrayList(baseIndicator))];
         }
         case ALLEQUAL:
         default:
