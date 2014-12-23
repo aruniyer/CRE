@@ -1,7 +1,14 @@
 package iitb.cre.confint;
 
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileFilter;
 import java.io.FileWriter;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map.Entry;
 
 import org.apache.commons.math3.analysis.solvers.LaguerreSolver;
@@ -25,13 +32,58 @@ public class GenerateTrainingData {
     private static int FEATURES_TO_COMPUTE = 7;
 
     public static void main(String[] args) throws Exception {
-        String prefix = "/home/aruniyer/Workspace/Data/forpedrtest/";
-        String dataFile = prefix + "Australian_train_0.1_1_400";
-        String kernelInformationFile = "australiankernels";
-        String outputFile = "australian_beta_features";
+        getTestingDataFeatures();
+    }
+    
+    public static void getTestingDataFeatures() throws Exception {
+        String prefix = "/home/aruniyer/Workspace/Data/datasets/addnl/traintest/500_ntfidf/1/";
+        String trainingFile = prefix + "training_data.dat";
+        String kernelInformationFile = "youtube.klist";
+        String outputFile = "youtube_beta_feature.test";
+        String testDir = prefix + "prototype_data";
+        File testDirFile = new File(testDir);
+        List<String> testFiles = findFiles(testDirFile, new FileFilter() {
+            @Override
+            public boolean accept(File pathname) {
+                if (pathname.getName().endsWith(".dat"))
+                    return true;
+                else
+                    return false;
+            }
+        });
         
+        computeFeaturesForTestData(trainingFile, testFiles, kernelInformationFile, outputFile);        
+    }
+    
+    public static List<String> findFiles(File rootDir, FileFilter filter) {
+        List<String> returnFiles = new LinkedList<String>();
+        Deque<File> directoryStack = new LinkedList<File>();
+        directoryStack.add(rootDir);
+        while (!directoryStack.isEmpty()) {
+            File dir = directoryStack.pop();
+            File[] files = dir.listFiles();
+            for (File file : files) {
+                if (filter.accept(file))
+                    returnFiles.add(file.getAbsolutePath());
+                if (file.isDirectory())
+                    directoryStack.push(file);
+            }
+        }
+        Collections.sort(returnFiles);
+        return returnFiles;
+    }
+    
+    public static void getTrainingDataFeatures() throws Exception {
+        String prefix = "/home/aruniyer/Workspace/Data/datasets/addnl/traintest/500_ntfidf/1/";
+        String trainingFile = prefix + "training_data.dat";
+        String kernelInformationFile = "youtube.klist";
+        String outputFile = "youtube_beta_feature.train";
+        computeFeaturesForTrainingData(trainingFile, kernelInformationFile, outputFile);
+    }
+    
+    public static void computeFeaturesForTestData(String trainingFile, List<String> testFiles, String kernelInformationFile, String outputFile) throws Exception {
         System.out.print("Loading training data ... ");
-        IDataStore D = Utility.readCSVFile(dataFile, " ", false);
+        IDataStore D = Utility.readCSVFile(trainingFile, " ", false);
         System.out.println("[DONE]");
         System.out.print("Loading the kernel functions ... ");
         IKernelFunction kernelFunction;
@@ -46,6 +98,43 @@ public class GenerateTrainingData {
             bufferedWriter.write("f" + i + ",");
         }
         bufferedWriter.write("label");
+        bufferedWriter.newLine();
+        for (String testFile : testFiles) {
+            IDataStore U = Utility.readCSVFile(testFile, " ", false);
+            System.out.print("Generating features for " + testFile + " ... ");
+            double[] props = Utility.getClassProps(U);
+            System.out.print(", props = " + Arrays.toString(props));
+            float[] features = generateTrainingData.computeFeatures(D, U, kernelFunction);
+            System.out.println(", " + Arrays.toString(features));
+            for (int i = 0; i < features.length; i++) {
+                bufferedWriter.write(features[i] + ",");
+            }
+            
+            bufferedWriter.write(props[1] + "");
+            bufferedWriter.newLine();
+            bufferedWriter.flush();
+        }
+        bufferedWriter.close();
+    }
+    
+    public static void computeFeaturesForTrainingData(String trainingFile, String kernelInformationFile, String outputFile) throws Exception {
+        System.out.print("Loading training data ... ");
+        IDataStore D = Utility.readCSVFile(trainingFile, " ", false);
+        System.out.println("[DONE]");
+        System.out.print("Loading the kernel functions ... ");
+        IKernelFunction kernelFunction;
+        if (kernelInformationFile != null && !kernelInformationFile.isEmpty())
+            kernelFunction = Utility.readKernelFile(kernelInformationFile);
+        else
+            kernelFunction = new GaussianFunction(Utility.selectBandwidth(D));
+        System.out.println("[DONE]");
+        GenerateTrainingData generateTrainingData = new GenerateTrainingData();
+        BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(outputFile));
+        String[] featureLabels = "thetaMMD,sMode2,obj,nu,varNorm,mnthetathresh,varNum,cntInd,true_theta".split(",");
+        for (int i = 0; i < FEATURES_TO_COMPUTE + 1; i++) {
+            bufferedWriter.write(featureLabels[i] + ",");
+        }
+        bufferedWriter.write(featureLabels[FEATURES_TO_COMPUTE + 1]);
         bufferedWriter.newLine();
         for (int size : new int[]{50, 100, 150, 200, 250, 300}) {
             System.out.println("Generating training data for size " + size + " ... ");
@@ -64,19 +153,21 @@ public class GenerateTrainingData {
 
     public IDataStore generateTrainingData(IDataStore D, IKernelFunction kernelFunction, int sizePerPrototype, long seed) {
         int numProportions = 11;
-        int numPrototypesPerProportion = 1;
+        int numPrototypesPerProportion = 2;
         IDataStore[] Us = Utility.getPrototypes(D, seed, numProportions, numPrototypesPerProportion, sizePerPrototype);
         SimpleDataStore simpleDataStore = new SimpleDataStore(2, FEATURES_TO_COMPUTE);
         for (int i = 0; i < Us.length; i++) {
-            System.out.println("U = " + (i + 1) + "/" + Us.length);
+            System.out.print("U = " + (i + 1) + "/" + Us.length);
             IDataStore Ui = Us[i];
             double[] props = Utility.getClassProps(Ui);
+            System.out.print(", props = " + Arrays.toString(props));
             float[] features = computeFeatures(D, Ui, kernelFunction);
+            System.out.println(", " + Arrays.toString(features));
             simpleDataStore.add(new SimpleInstance(features, (float) props[1]));
         }
         return simpleDataStore;
     }
-
+    
     public float[] computeFeatures(IDataStore D, IDataStore Ui, IKernelFunction kernelFunction) {
         int k = 10;
         TIntArrayList[] splitsD = Utility.splitter(D, k, 1);
@@ -120,7 +211,7 @@ public class GenerateTrainingData {
             double[] estimate = mmdEstimator.estimateFractions();
             double objective = mmdEstimator.getObjective();
             objective += constant;
-
+            
             double phipphip = 0;
             double phipphin = 0;
             int countpp = 0, countpn = 0;
@@ -178,7 +269,7 @@ public class GenerateTrainingData {
         objective += constant;
 
         features[0] = (float) estimate[1];
-        features[1] = (float) solve(estimate[1], estimates.getVariance());
+        features[1] = (float) solve(estimate[1], estimates.getVariance(), estimates.getMean());
         if (features[0] <= 0)
             throw new IllegalStateException("Should have at least two real root!");
         features[2] = (float) objective;
@@ -191,7 +282,24 @@ public class GenerateTrainingData {
         return features;
     }
 
-    private double solve(double thetaMMD, double variance) {
+    private double solve(double thetaMMD, double variance, double thetaMean) {
+        // handing boundary conditions
+        double eps = 0.001;
+        if (thetaMean <= eps)
+            thetaMean = eps;
+        if (thetaMean >= 1 - eps)
+            thetaMean = 1 - eps;
+        if (variance <= Math.pow(eps, 4))
+            variance = Math.pow(eps, 4);
+        double ub1 = thetaMean * thetaMean * (1 - thetaMean) / (1 + thetaMean);
+        double ub2 = (1 - thetaMean) * (1 - thetaMean) * thetaMean / (2 - thetaMean);
+        if (variance >= Math.min(ub1, ub2))
+            variance = Math.min(ub1, ub2);
+        if (thetaMMD <= eps)
+            thetaMMD = eps;
+        if (thetaMMD >= 1 - eps)
+            thetaMMD = 1 - eps;
+        
         double v = variance;
         double md = thetaMMD;
         double a = v;
@@ -199,7 +307,7 @@ public class GenerateTrainingData {
         double c = v + 2 * md - 1 - 4 * md * md + 2 * md;
         double d = 4 * md * md - 4 * md + 1;
         double[] coeffs = { d, c, b, a };
-        LaguerreSolver laguerreSolver = new LaguerreSolver();
+        LaguerreSolver laguerreSolver = new LaguerreSolver(1e-2, 1e-2);
         Complex[] solutions = laguerreSolver.solveAllComplex(coeffs, 0);
         double max = -1;
         for (int i = 0; i < solutions.length; i++) {
