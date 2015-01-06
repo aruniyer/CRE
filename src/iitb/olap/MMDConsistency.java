@@ -73,7 +73,7 @@ public class MMDConsistency {
             currObj = getMMDObjective(x);
             System.out.println(currObj);
             i++;
-        } while (Math.abs(prevObj - currObj) > 1e-4 && i < 100);
+        } while ((prevObj - currObj > 1e-4 || Math.abs(prevObj - currObj) > 1) && i < 100);
         return getMMDObjective(x);
     }
 
@@ -202,12 +202,12 @@ public class MMDConsistency {
             double total = 0;
             double sum = 0;
             for (int i = 0; i < baseIndicator.length; i++) {
+                total = total + nu[i];
                 if (baseIndicator[i] == 1) {
-                    total = total + nu[i];
                     sum += nu[i] * nu[i];
                 }
             }
-            return Math.sqrt((total * total) / sum);
+            return Math.sqrt(sum / total * total);
         }
         case ALLEQUAL:
         default:
@@ -292,7 +292,7 @@ public class MMDConsistency {
                                 System.arraycopy(currentTheta, 0, thetaj, 0, A.length);
                             }
                             for (int k = 0; k < A.length; k++) {
-                                grad[k] += (nu[i] * nu[j] * 2 * dot(A[k], thetai)) / (totalNu * totalNu);
+                                grad[k] += (nu[i] * nu[j] * 2.0 * dot(A[k], thetai)) / (totalNu * totalNu);
                             }
                         }
                     }
