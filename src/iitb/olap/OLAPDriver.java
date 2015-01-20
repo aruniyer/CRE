@@ -24,25 +24,34 @@ import iitb.olap.MMDConsistency.WeightScheme;
 public class OLAPDriver {
 
     public static void main(String[] args) throws Exception {
-        String dataset = "SatImage";
+        String dataset = "Twitter";
         String outputPrefix = dataset + "2_cons_output_";
-        int numFeatures = 36;
-        Random random = new Random(1);
-        for (int i = 0; i < 10; i++) {
-            TIntArrayList perm = Utility.selectKRandom(random, numFeatures, 3);
-//            TIntArrayList perm = new TIntArrayList();
-//            perm.add(4); perm.add(6); perm.add(7);
-            main2(dataset, perm.toArray(), outputPrefix + Arrays.toString(perm.toArray()) + ".csv");
-        }
+        String kernelFile = "/home/arunbcn/Workspace/Java/CRE/twitter.klist";
+//        int numFeatures = 8;
+//        Random random = new Random(1);
+//        for (int i = 0; i < 10; i++) {
+//            TIntArrayList perm = Utility.selectKRandom(random, numFeatures, 3);
+//            main2(dataset, perm.toArray(), kernelFile, outputPrefix + Arrays.toString(perm.toArray()) + ".csv");
+//        }
+        TIntArrayList perm = new TIntArrayList();
+        perm.add(0); perm.add(1);
+        main2(dataset, perm.toArray(), kernelFile, outputPrefix + Arrays.toString(perm.toArray()) + ".csv");
     }
     
-    public static void main2(String dataset, int[] atts, String outputFile) throws Exception {
+    public static void main2(String dataset, int[] atts, String kernelFile, String outputFile) throws Exception {
         // String configFile = args[0];
         String configFile = "configcons.xml";
 
+//        StringBuilder builder = new StringBuilder();
+//        builder.append("-Inf");
+//        for (double x = -0.9; x < 1; x += 0.1) {
+//            builder.append(", " + x);
+//        }
+//        builder.append(", Inf");
+        
         StringBuilder builder = new StringBuilder();
         builder.append("-Inf");
-        for (double x = -0.9; x < 1; x += 0.1) {
+        for (double x = -1.1; x < 8; x += 1) {
             builder.append(", " + x);
         }
         builder.append(", Inf");
@@ -56,8 +65,11 @@ public class OLAPDriver {
 
         System.out.println("Loading data handler ... ");
         DataHandler dataHandler = config.getDataHandler();
-        double sigma = dataHandler.getMeanDistance();
-        IKernelFunction kernel = new GaussianFunction(sigma);
+        IKernelFunction kernel = null;
+        if (kernelFile == null)
+            kernel = new GaussianFunction(dataHandler.getMeanDistance());
+        else 
+            kernel = Utility.readKernelFile(kernelFile);
         System.out.print("Building A and b ... ");
         long start = System.currentTimeMillis();
         double[][] A = getA(dataHandler, kernel, config);

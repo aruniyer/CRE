@@ -16,14 +16,23 @@ import iitb.kernel.WeightedKernelFunction;
 public class MainLearning {
     
     public static void main(String[] args) throws Exception {
-        String prefix = "data/";
-        String trainingFile = prefix + "shuttle_train.csv";
-        String outputFile = "shuttle.klist";
-        String testingFile = "";
-        String trainSeparator = ",";
-        String testSeparator = ",";
-        boolean headerTrain = true;
-        boolean headerTest = true;
+        String prefix = "/home/arunbcn/Workspace/sanders-twitter-0.2/data/";
+        String trainingFile = prefix + "train_features.csv";
+        String testingFile = prefix + "test_features.csv";
+        String trainSeparator = " ";
+        String testSeparator = " ";
+        boolean headerTrain = false;
+        boolean headerTest = false;
+        String outputFile = "twitter.klist";
+        
+//        String prefix = "data/";
+//        String trainingFile = prefix + "shuttle_train.csv";
+//        String outputFile = "shuttle.klist";
+//        String testingFile = "";
+//        String trainSeparator = ",";
+//        String testSeparator = ",";
+//        boolean headerTrain = true;
+//        boolean headerTest = true;
         
         System.out.print("Loading training data ... ");
         IDataStore D = Utility.readCSVFile(trainingFile, trainSeparator, headerTrain);

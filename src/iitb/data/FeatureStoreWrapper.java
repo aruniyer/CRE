@@ -56,9 +56,13 @@ public class FeatureStoreWrapper implements IDataStore {
     private class InstanceWrapper implements IInstance {
 
         private Instance instance;
-
+        
         public InstanceWrapper(Instance instance) {
-            this.instance = instance;
+            try {
+                this.instance = (Instance) instance.clone();
+            } catch (CloneNotSupportedException cloneNotSupportedException) {
+                cloneNotSupportedException.printStackTrace();
+            }
         }
 
         @Override
@@ -75,7 +79,7 @@ public class FeatureStoreWrapper implements IDataStore {
         public int numFeatures() {
             return instance.numFeatures();
         }
-        
+
         @Override
         public IInstance clone() {
             try {
@@ -92,7 +96,7 @@ public class FeatureStoreWrapper implements IDataStore {
     public int numClasses() {
         return featureStore.getFeatureList().numClasses();
     }
-    
+
     @Override
     public int numFeatures() {
         return featureStore.getFeatureList().numFeatures();
@@ -100,20 +104,20 @@ public class FeatureStoreWrapper implements IDataStore {
 
     @Override
     public IInstance get(int index) {
-	try {
-	    return new InstanceWrapper(featureStore.instancesAt(new int[]{index}).next());
-	} catch (Exception exception) {
-	    throw new RuntimeException("Unable to fetch instances from feature store!", exception);
-	}
+        try {
+            return new InstanceWrapper(featureStore.instancesAt(new int[] { index }).next());
+        } catch (Exception exception) {
+            throw new RuntimeException("Unable to fetch instances from feature store!", exception);
+        }
     }
-    
+
     @Override
     public IDataStore getView(int[] indices) {
         SimpleDataStore viewStore = new SimpleDataStore(numClasses(), numFeatures());
         try {
             IteratorWithCount iterator = featureStore.instancesAt(indices);
             while (iterator.hasNext()) {
-        	viewStore.add(new InstanceWrapper(iterator.next()));
+                viewStore.add(new InstanceWrapper(iterator.next()));
             }
             return viewStore;
         } catch (Exception exception) {
