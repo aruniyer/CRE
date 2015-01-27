@@ -12,7 +12,6 @@ import java.util.Random;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
-import iitb.Utility;
 import iitb.cre.MMDEstimator;
 import iitb.data.IInstance;
 import iitb.kernel.GaussianFunction;
@@ -20,6 +19,7 @@ import iitb.kernel.IKernelFunction;
 import iitb.olap.Config.DataHandler;
 import iitb.olap.Config.DataHandler.GroupInfo;
 import iitb.olap.MMDConsistency.WeightScheme;
+import iitb.util.Utility;
 
 public class OLAPDriver {
 

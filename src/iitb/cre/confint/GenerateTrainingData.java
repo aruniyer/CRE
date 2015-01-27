@@ -16,7 +16,6 @@ import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import gnu.trove.list.array.TIntArrayList;
-import iitb.Utility;
 import iitb.cre.MMDEstimator;
 import iitb.data.IDataStore;
 import iitb.data.IInstance;
@@ -26,6 +25,7 @@ import iitb.kernel.GaussianFunction;
 import iitb.kernel.IKernel;
 import iitb.kernel.IKernelFunction;
 import iitb.kernel.OnTheFlyKernel;
+import iitb.util.Utility;
 
 public class GenerateTrainingData {
 

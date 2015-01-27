@@ -7,23 +7,25 @@ import iitb.kernel.GaussianFunction;
 import iitb.kernel.IKernel;
 import iitb.kernel.IKernelFunction;
 import iitb.kernel.OnTheFlyKernel;
+import iitb.util.Utility;
 
 import java.util.Arrays;
 
 public class MainEstimator {
 
     public static void main(String[] args) throws Exception {
-        String prefix = "/home/arunbcn/Workspace/sanders-twitter-0.2/data/";
-        String trainingFile = prefix + "train_features.csv";
-        String testingFile = prefix + "test_features.csv";
-        String trainSeparator = " ";
-        String testSeparator = " ";
-        boolean headerTrain = false;
-        boolean headerTest = false;
-        // kernel file indicates the file with kernel weights learned
-        // if set to null, the estimator use a default kernel with mean distance as bandwidth
-        String kernelFile = "twitter.klist"; // "shuttle.klist";
+        String prefix = "data/";
+        String trainingFile = prefix + "shuttle_train.csv";
+        String testingFile = prefix + "shuttle_test.csv";
+        String trainSeparator = ",";
+        String testSeparator = ",";
+        boolean headerTrain = true;
+        boolean headerTest = true;
         
+        // kernel file indicates the file with kernel weights learned
+        // if set to null, the estimator uses a default kernel with 
+        // mean distance as bandwidth
+        String kernelFile = "shuttle.klist";
         doEstimation(trainingFile, trainSeparator, headerTrain, testingFile, testSeparator, headerTest, kernelFile);        
     }
     

@@ -1,13 +1,13 @@
 package iitb.olap;
 
 import gnu.trove.list.array.TIntArrayList;
-import iitb.Twiddle;
 import iitb.data.FeatureStoreWrapper;
 import iitb.data.IDataStore;
 import iitb.data.IInstance;
 import iitb.shared.Utils;
 import iitb.shared.XMLConfigs;
 import iitb.shared.repository.fixedLengthRecords.FeatureStore;
+import iitb.util.Twiddle;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;

@@ -4,10 +4,10 @@ import java.util.Arrays;
 
 import org.apache.commons.math3.special.Gamma;
 
-import iitb.Utility;
 import iitb.data.IDataStore;
 import iitb.data.IInstance;
 import iitb.shared.optimization.GradientCompute;
+import iitb.util.Utility;
 
 public class BetaVarianceModel {
 
